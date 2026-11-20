@@ -120,8 +120,8 @@ def pin_assembly(name, M, loc, length, parent=None, axis_rot=(R(90), 0, 0)):
     root = pivot(name, loc, parent=parent, rot=axis_rot)
     cyl(name + "_pin", (0, 0, 0), RP - 0.002, length, M["pin"], verts=48, parent=root)
     for s in (-1, 1):
-        cyl(f"{name}_nut{s}", (0, 0, s * (length / 2 + 0.04)), 0.24, 0.08, M["pin"], verts=6, parent=root, bevel=0.01)
-        cyl(f"{name}_cap{s}", (0, 0, s * (length / 2 + 0.1)), 0.17, 0.05, M["pin"], verts=32, parent=root, bevel=0.01)
+        cyl(f"{name}_nut{s}", (0, 0, s * (length / 2 + 0.04)), 0.2, 0.08, M["pin"], verts=6, parent=root, bevel=0.01)
+        cyl(f"{name}_cap{s}", (0, 0, s * (length / 2 + 0.1)), 0.15, 0.05, M["pin"], verts=32, parent=root, bevel=0.01)
     return root
 
 
@@ -171,8 +171,8 @@ def shot_eye(out, v=False):
     sis = eyebar("e10_33", L, M["alu"], parent=root); sis.location.z = 0.09
     pin_assembly("e10_pin330", M, (0, 0, 1.0), 0.32, axis_rot=(R(90), 0, 0))
     # crack on the inner surface of the lower limb (enlarged): thin red sliver growing outwards
-    cr = box("e10_crackm", (0, 0, 0), (0.012, 0.03, 0.055), M["crack"], bevel=0.0)
-    cr.parent = root; cr.location = (L, -RP - 0.015, -0.09)
+    cr = box("e10_crackm", (0, 0, 0), (0.012, 0.09, 0.056), M["crack"], bevel=0.0)
+    cr.parent = root; cr.location = (L, -RP - 0.045, -0.09)
     animate(cr, "scale", [(1, Vector((1, 0.05, 1))), (60, Vector((1, 0.05, 1))), (120, Vector((1, 1.0, 1)))])
     bpy.ops.object.light_add(type='POINT', location=(0, -0.3, 0.75)); Lt = bpy.context.object
     Lt.data.color = (1.0, 0.12, 0.05)
@@ -188,7 +188,7 @@ def shot_eye(out, v=False):
         animate(o, "location", [(190, o.location.copy()), (205, o.location + Vector((0, 0, 0.5)))])
         animate(o, "scale", [(205, Vector((1, 1, 1))), (215, Vector((0.01, 0.01, 0.01)))])
     # sister eyebar 33 slides off the end of the pin (along local z = world -Y) and drops away
-    animate(sis, "location", [(205, Vector((0, 0, 0.09))), (250, Vector((0, 0, 0.75)))])
+    animate(sis, "location", [(205, Vector((0, 0, 0.09))), (240, Vector((0, 0, 0.45))), (285, Vector((0, -0.9, 0.55)))])
     animate(sis, "rotation_euler", [(215, Euler((0, 0, 0))), (285, Euler((0, R(8), R(-14))))])
     if v:
         camera("dolly", target=(0, 0, 0.8), start=(0.9, -3.4, 1.5), end=(0.45, -2.2, 1.1), lens=35, fstop=5.6)
