@@ -131,10 +131,10 @@ def shot_joint(out, v=False):
     M = M_(); studio(target=(0, 0, 0.0), scale=0.5)
     L = 3.2
     # joint at origin; link A comes from the left (rising), link B goes right (rising)
-    j = pivot("e10_joint", (0, 0, 1.2))
+    j = pivot("e10_joint", (0, 0, 2.3))
     pin_assembly("e10_pinA", M, (0, 0, 0), 0.62, parent=j)
-    la = pivot("e10_linkA", (0, 0, 0), parent=j, rot=(R(90), R(-200), 0))
-    lb = pivot("e10_linkB", (0, 0, 0), parent=j, rot=(R(90), R(18), 0))
+    la = pivot("e10_linkA", (0, 0, 0), parent=j, rot=(R(90), R(166), 0))
+    lb = pivot("e10_linkB", (0, 0, 0), parent=j, rot=(R(90), R(-22), 0))
     for k, z in enumerate((-0.2, 0.2)):          # link A bars outside, link B bars inside
         b = eyebar(f"e10_a{k}", L, M["alu"], parent=la); b.location = (0, 0, z)
     for k, z in enumerate((-0.11, 0.11)):
@@ -142,20 +142,20 @@ def shot_joint(out, v=False):
     # hanger plates hanging from the pin
     hg = pivot("e10_hanger", (0, 0, 0), parent=j)
     for s in (-0.03, 0.03):
-        box(f"e10_hang{s}", (0, s, -1.6), (0.22, 0.025, 3.2), M["alu2"], bevel=0.008, parent=hg)
-    cyl("e10_hangpin", (0, 0, -3.0), 0.06, 0.2, M["pin"], rot=(R(90), 0, 0), verts=24, parent=hg)
+        box(f"e10_hang{s}", (0, s, -1.05), (0.22, 0.025, 2.0), M["alu2"], bevel=0.008, parent=hg)
+    cyl("e10_hangpin", (0, 0, -1.9), 0.06, 0.2, M["pin"], rot=(R(90), 0, 0), verts=24, parent=hg)
     # load passing: links flex a couple of degrees, hanger swings slightly
-    animate(la, "rotation_euler", [(1, Euler((R(90), R(-200), 0))), (120, Euler((R(90), R(-197.5), 0))), (270, Euler((R(90), R(-200), 0)))])
-    animate(lb, "rotation_euler", [(1, Euler((R(90), R(18), 0))), (120, Euler((R(90), R(15.5), 0))), (270, Euler((R(90), R(18), 0)))])
+    animate(la, "rotation_euler", [(1, Euler((R(90), R(166), 0))), (120, Euler((R(90), R(163.5), 0))), (270, Euler((R(90), R(166), 0)))])
+    animate(lb, "rotation_euler", [(1, Euler((R(90), R(-22), 0))), (120, Euler((R(90), R(-19.5), 0))), (270, Euler((R(90), R(-22), 0)))])
     animate(hg, "rotation_euler", [(1, Euler((0, 0, 0))), (120, Euler((0, R(1.5), 0))), (270, Euler((0, 0, 0)))])
     # amber "load" pulse travelling along link A into the pin
-    pulse = sphere("e10_pulse", (0, 0, 0), 0.07, M["amber"], parent=la)
+    pulse = sphere("e10_pulse", (0, 0, 0), 0.09, M["amber"], parent=la)
     animate(pulse, "location", [(20, Vector((L, 0, 0.27))), (110, Vector((0.4, 0, 0.27))), (135, Vector((0.2, 0, 0.27)))])
     animate(pulse, "scale", [(15, Vector((0.01,) * 3)), (25, Vector((1,) * 3)), (125, Vector((1,) * 3)), (140, Vector((0.01,) * 3))])
     if v:
-        camera("dolly", target=(0, 0, 0.9), start=(1.4, -4.8, 2.6), end=(0.6, -3.4, 1.9), lens=35, fstop=5.6)
+        camera("dolly", target=(0, 0, 2.0), start=(1.4, -4.8, 3.4), end=(0.6, -3.4, 2.8), lens=35, fstop=5.6)
     else:
-        camera("orbit", target=(0, 0, 1.0), radius=4.2, height=1.6, deg=40, start_deg=-110, lens=40, fstop=5.6)
+        camera("orbit", target=(0, 0, 2.0), radius=4.4, height=0.9, deg=40, start_deg=-115, lens=40, fstop=5.6)
     polish(sc)
     return sc
 
@@ -245,9 +245,9 @@ def shot_links(out, v=False):
     animate(halo8, "scale", [(1, Vector((0.01, 0.01, 0.01))), (110, Vector((0.01, 0.01, 0.01))), (125, Vector((1, 1, 1)))])
     shake(b_load, amp=0.01, freq=6, f0=95, f1=140)
     if v:
-        camera("dolly", target=(0, 0, 1.9), start=(0.6, -8.6, 2.6), end=(0.4, -7.6, 2.4), lens=35, fstop=11)
+        camera("dolly", target=(0, 0, 1.9), start=(4.0, -7.8, 3.2), end=(3.3, -6.7, 2.9), lens=35, fstop=11)
     else:
-        camera("dolly", target=(0, 0, 1.9), start=(1.5, -7.6, 2.8), end=(0.8, -6.2, 2.4), lens=35, fstop=11)
+        camera("dolly", target=(0, 0, 1.9), start=(5.0, -6.0, 3.4), end=(4.1, -4.9, 3.0), lens=35, fstop=11)
     polish(sc)
     return sc
 
@@ -256,6 +256,12 @@ def shot_links(out, v=False):
 def shot_bridge(out, v=False):
     sc = stage("ep10_bridge" + ("_v" if v else ""), seconds=10.0, samples=16, res=(1080, 1920) if v else (1920, 1080))
     M = M_(); day(sun_elev=22, sun_rot=210, ground_color=(0.25, 0.27, 0.2))
+    for o in list(bpy.context.scene.objects):
+        if o.name.split(".")[0] == "ground":
+            bpy.data.objects.remove(o, do_unlink=True)
+    bank = mat("e10_bank", (0.16, 0.2, 0.1), 0.0, 0.95, wear=0.3, wear_scale=3)
+    for k, sx in enumerate((-1, 1)):
+        box(f"e10_bank{k}", (sx * 150, 0, -5.0), (140, 700, 9.6), bank, bevel=0.0)
     W = 1.6                       # half-width between chain planes
     xs = [-73, -35, 35, 73]        # anchorage(Ohio, west), Ohio tower, WV tower, anchorage (WV, east)
     TOP, HT = 12.5, 2.2            # tower top above deck; truss depth
@@ -292,7 +298,7 @@ def shot_bridge(out, v=False):
     panels = [xs[0] + i * (xs[3] - xs[0]) / 42 for i in range(43)]
     for s in (-1, 1):
         y = s * W
-        tube(f"e10_chain{s}", [(x, y, chain_z(x) + 0.7) for x in xsamp], 0.16, M["alu"])
+        tube(f"e10_chain{s}", [(x, y, chain_z(x) + 0.7) for x in xsamp], 0.24, M["alu"])
         # stiffening truss: chords, verticals, diagonals; hangers from the chain to the top chord
         tube(f"e10_bot{s}", [(xs[0], y, 0.7), (xs[3], y, 0.7)], 0.14, M["alu"])
         tube(f"e10_topc{s}", [(xs[0], y, HT + 0.7), (xs[3], y, HT + 0.7)], 0.11, M["alu"])
@@ -311,12 +317,12 @@ def shot_bridge(out, v=False):
         box(f"e10_appr{k}", (xa, 0, 0.6), (40, 2 * W, 0.4), M["conc"], bevel=0.05)
     # highlight: joint C13N, first chain joint west of the Ohio tower (north chain = +y here)
     xj = -35 - (xs[1] - xs[0]) / 7.0
-    marker = sphere("e10_c13n", (xj, W, chain_z(xj) + 0.7), 0.42, M["amber"])
+    marker = sphere("e10_c13n", (xj, W, chain_z(xj) + 0.7), 0.7, M["amber"])
     animate(marker, "scale", [(1, Vector((0.01,) * 3)), (150, Vector((0.01,) * 3)), (175, Vector((1.4,) * 3))])
     bpy.ops.object.light_add(type='POINT', location=(xj, W + 1.2, chain_z(xj) + 1.5)); Lt = bpy.context.object
     Lt.data.color = (1.0, 0.6, 0.1); animate(Lt.data, "energy", [(1, 0.0), (150, 0.0), (180, 4000.0)])
     # load pulse running along the north chain from mid-span to the Ohio anchorage
-    pulse = sphere("e10_flow", (0, W, HT + 0.7), 0.3, M["amber"])
+    pulse = sphere("e10_flow", (0, W, HT + 0.7), 0.55, M["amber"])
     pts = [(x, W, chain_z(x) + 0.7) for x in [0 - i * 1.825 for i in range(41)]]
     follow(pulse, pts, f0=20, f1=150, ease='LINEAR')
     animate(pulse, "scale", [(15, Vector((0.01,) * 3)), (25, Vector((1,) * 3)), (145, Vector((1,) * 3)), (155, Vector((0.01,) * 3))])
@@ -336,5 +342,5 @@ def build_all(out, only=None, v=False):
         if only and fn.__name__ not in only:
             continue
         sc = fn(out, v=v); names.append(sc.name)
-        sc.view_settings.exposure = -1.0 if fn is not shot_bridge else 0.0
+        sc.view_settings.exposure = -1.0
     return names
