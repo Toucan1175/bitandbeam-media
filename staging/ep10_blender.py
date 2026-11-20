@@ -463,22 +463,24 @@ def shot_collapse(out, v=False):
     F = 85
     W_, M_s, E_ = spans["W"][2], spans["M"][2], spans["E"][2]
     # 1) Ohio side span: north side and tower end drop first, then the whole span falls (west part onto the shore)
-    animate(W_, "rotation_euler", [(F, Euler((0, 0, 0))), (F + 20, Euler((R(-9), R(10), 0))), (F + 55, Euler((R(-14), R(6), 0)))], ease='EASE_IN')
+    animate(W_, "rotation_euler", [(F, Euler((0, 0, 0))), (F + 20, Euler((R(-9), R(10), 0))), (F + 55, Euler((R(-38), R(6), 0)))], ease='EASE_IN')
     animate(W_, "location", [(F + 8, Vector((xs[0], 0, 0.7))), (F + 55, Vector((xs[0], 0, -3.6)))], ease='EASE_IN')
     # 2) Ohio tower loses the pull of the side-span chain and rocks east
     animate(towers[0], "rotation_euler", [(F + 15, Euler((0, 0, 0))), (F + 110, Euler((0, R(82), 0)))], ease='EASE_IN')
     animate(towers[0], "location", [(F + 80, Vector((xs[1], 0, -0.7))), (F + 110, Vector((xs[1] + 1.0, 0, -3.5)))], ease='EASE_IN')
     # 3) main span goes down west end first
-    animate(M_s, "rotation_euler", [(F + 25, Euler((0, 0, 0))), (F + 70, Euler((R(-5), R(-9), 0))), (F + 125, Euler((R(-8), R(-2), 0)))], ease='EASE_IN')
-    animate(M_s, "location", [(F + 35, Vector((0, 0, 0.7))), (F + 125, Vector((0, 0, -9.6)))], ease='EASE_IN')
+    animate(M_s, "rotation_euler", [(F + 25, Euler((0, 0, 0))), (F + 70, Euler((R(-5), R(-9), 0))), (F + 125, Euler((R(-62), R(-2), 0)))], ease='EASE_IN')
+    animate(M_s, "location", [(F + 35, Vector((0, 0, 0.7))), (F + 125, Vector((0, 0, -10.6)))], ease='EASE_IN')
     # 4) West Virginia tower falls east
     animate(towers[1], "rotation_euler", [(F + 70, Euler((0, 0, 0))), (F + 165, Euler((0, R(86), 0)))], ease='EASE_IN')
     animate(towers[1], "location", [(F + 130, Vector((xs[2], 0, -0.7))), (F + 165, Vector((xs[2] + 1.0, 0, -4.0)))], ease='EASE_IN')
     # 5) West Virginia side span: tower end drops, then the span
-    animate(E_, "rotation_euler", [(F + 105, Euler((0, 0, 0))), (F + 135, Euler((R(-6), R(-11), 0))), (F + 175, Euler((R(-9), R(-4), 0)))], ease='EASE_IN')
-    animate(E_, "location", [(F + 115, Vector((xs[3], 0, 0.7))), (F + 175, Vector((xs[3], 0, -9.8)))], ease='EASE_IN')
+    animate(E_, "rotation_euler", [(F + 105, Euler((0, 0, 0))), (F + 135, Euler((R(-6), R(-11), 0))), (F + 175, Euler((R(-45), R(-4), 0)))], ease='EASE_IN')
+    animate(E_, "location", [(F + 115, Vector((xs[3], 0, 0.7))), (F + 175, Vector((xs[3], 0, -10.4)))], ease='EASE_IN')
     if v:
-        camera("dolly", target=(-22, 0, 0.0), start=(-46, 70, 15), end=(-40, 64, 13), lens=20, fstop=16)
+        cam, tgt = camera("dolly", target=(-36, 0, 0.0), start=(-44, 50, 9), end=(-24, 52, 9), lens=20, fstop=16)
+        animate(tgt, "location", [(60, Vector((-36, 0, 0.0))), (300, Vector((-12, 0, -3.0)))])
     else:
-        camera("dolly", target=(-4, 0, -1.0), start=(-30, 104, 22), end=(-14, 96, 18), lens=28, fstop=16)
+        cam, tgt = camera("dolly", target=(-34, 0, 0.0), start=(-38, 56, 10), end=(-8, 60, 11), lens=24, fstop=16)
+        animate(tgt, "location", [(60, Vector((-34, 0, 0.0))), (300, Vector((4, 0, -3.0)))])
     return sc
