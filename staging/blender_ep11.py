@@ -117,9 +117,11 @@ def _room(M):
         if mp:
             mp[0].inputs["Scale"].default_value = (38 / 1.7, 24 / 1.7, 1)
     box("ceiling", (-1, 0, 3.7), (38, 24, 0.1), M["ceil"], bevel=0)
+    lp = box("lp_proto", (-18, -9, 3.64), (1.8, 0.6, 0.03), M["panel"], bevel=0)
     for x in range(-18, 18, 3):
         for y in (-9, -5, -1, 3, 7):
-            box(f"lp_{x}_{y}", (x, y, 3.64), (1.8, 0.6, 0.03), M["panel"], bevel=0)
+            if (x, y) != (-18, -9):
+                o = lp.copy(); o.data = lp.data; o.location = (x, y, 3.64); bpy.context.scene.collection.objects.link(o)
     # walls: back (x=-20), right (y=-12), server-room end (x=18); window wall at y=+12
     box("wall_w", (-20, 0, 1.85), (0.2, 24, 3.7), M["wall"], bevel=0)
     box("wall_s", (-1, -12, 1.85), (38, 0.2, 3.7), M["wall"], bevel=0)
@@ -166,11 +168,40 @@ def desk(M, x, y, rotz=0, n_mon=2, red=False):
     return g
 
 
+def _join_desk(M, k, n_mon):
+    """Build one desk at the origin and join it into a single mesh (fast to copy)."""
+    g = desk(M, 0, 100 + k * 5, 0, n_mon=n_mon)
+    kids = [c for c in g.children_recursive if c.type == 'MESH']
+    for c in kids:
+        mw = c.matrix_world.copy(); c.parent = None; c.matrix_world = mw
+        for md in list(c.modifiers):
+            bpy.context.view_layer.objects.active = c
+            try:
+                bpy.ops.object.modifier_apply(modifier=md.name)
+            except Exception:
+                c.modifiers.remove(md)
+    bpy.ops.object.select_all(action='DESELECT')
+    for c in kids:
+        c.select_set(True)
+    bpy.context.view_layer.objects.active = kids[0]
+    bpy.ops.object.join()
+    o = bpy.context.object; o.name = f"deskproto_{k}"
+    bpy.data.objects.remove(g)
+    o.location.y -= 100 + k * 5
+    bpy.ops.object.transform_apply(location=True, rotation=False, scale=False)
+    return o
+
+
 def trading_floor(M):
     random.seed(11)
+    protos = [_join_desk(M, k, n) for k, n in enumerate((2, 3, 3))]
     for row, y in enumerate((-8, -4, 0, 4, 8)):
         for x in (-17, -15.2, -13.4, -9, -7.2, -5.4, -1, 0.8, 2.6):
-            desk(M, x, y, R(180) if row % 2 else 0, n_mon=3 if random.random() < 0.5 else 2)
+            p = random.choice(protos)
+            o = p.copy(); o.data = p.data; o.name = f"desk_{x}_{y}"; bpy.context.scene.collection.objects.link(o)
+            o.location = (x, y, 0); o.rotation_euler = (0, 0, R(180) if row % 2 else 0)
+    for p in protos:
+        bpy.data.objects.remove(p)
 
 
 def rack(M, i, y):
