@@ -282,7 +282,19 @@ def crowd():
 
 
 # ------------------------------------------------------------------ shots
+def _drop_scene(n):
+    """Remove a shot scene without touching the shared world/crowd collections (stage() would delete them)."""
+    old = bpy.data.scenes.get(n)
+    if not old:
+        return
+    for ch in list(old.collection.children):
+        old.collection.children.unlink(ch)
+    bpy.data.batch_remove(list(old.collection.objects))
+    bpy.data.scenes.remove(old)
+
+
 def _shot(name, seconds, v, **kw):
+    _drop_scene(name + ("_v" if v else ""))
     sc = stage(name + ("_v" if v else ""), seconds=seconds, res=(1080, 1920) if v else (1920, 1080), samples=16)
     _world(sc)
     return sc
@@ -347,7 +359,7 @@ def shot_racks(v=False):
 
 def _stream(name, src_loc, rate_start, frame_end, count, direction=(-1, 0, 0), speed=5.0, card=None):
     bpy.ops.mesh.primitive_plane_add(size=0.4, location=src_loc, rotation=(0, R(-90), 0)); em = bpy.context.object
-    em.name = name; em.hide_render = True
+    em.name = name; em.show_instancer_for_render = False; em.show_instancer_for_viewport = False
     ps_mod = em.modifiers.new(name + "_ps", 'PARTICLE_SYSTEM'); ps = ps_mod.particle_system.settings
     ps.count = count; ps.frame_start = rate_start; ps.frame_end = frame_end; ps.lifetime = 140
     ps.emit_from = 'FACE'; ps.normal_factor = speed; ps.factor_random = 1.2; ps.effector_weights.gravity = 0.0
