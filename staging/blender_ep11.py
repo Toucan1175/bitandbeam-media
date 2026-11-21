@@ -446,10 +446,10 @@ def shot_pile(v=False):
         o = b0.copy(); o.data = b0.data; o.name = f"sbox_{k}"; sc.collection.objects.link(o)
         o.rotation_euler = (0, 0, random.uniform(0, math.pi))
         f = int(8 + k * (sc.frame_end - 40) / n)
-        animate(o, "location", [(f, Vector((x, y, 3.4))), (f + 9, Vector((x, y, z)))], interp='BEZIER', ease='EASE_IN')
+        animate(o, "location", [(f, Vector((x, y, 2.9))), (f + 6, Vector((x, y, z)))], interp='LINEAR')
         # invisible until it starts to fall (no boxes parked under the ceiling)
         animate(o, "scale", [(1, Vector((0.001, 0.001, 0.001))), (f - 1, Vector((0.001, 0.001, 0.001))), (f, Vector((1, 1, 1)))], interp='CONSTANT')
-    for k, (x, y) in enumerate([(-11.5, -1.9), (-3.2, -1.9), (-3.2, 6.3), (-11.2, 6.3)]):   # in the aisles, facing the pile
+    for k, (x, y) in enumerate([(-12.7, 2.2), (-3.5, 1.8), (-8.6, 6.0), (-5.6, 6.1)]):   # aisle ends and far aisle, >5 m from camera
         person(f"obs_{k}", (x, y, 0), face((cx, cy), (x, y)), "Idle", f0=-k * 30)
     # (no 3D label: the edit's HUD chip carries the number)
     camera("orbit", target=(cx, cy, 1.3), radius=6.0, height=0.7, deg=30, start_deg=-110, lens=22, fstop=5)
