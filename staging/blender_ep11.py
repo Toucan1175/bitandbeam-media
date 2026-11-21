@@ -26,7 +26,7 @@ def _mats():
         desk=mat("e11_desk", (0.32, 0.25, 0.18), 0.0, 0.45, wear=0.15, wear_scale=20),
         leg=mat("e11_leg", (0.1, 0.1, 0.11), 0.9, 0.3),
         bezel=mat("e11_bezel", (0.02, 0.02, 0.025), 0.3, 0.35),
-        screen=mat("e11_screen", (0.01, 0.015, 0.03), 0.0, 0.2, emit=(0.02, 0.05, 0.13), strength=1.6),
+        screen=mat("e11_screen", (0.01, 0.015, 0.03), 0.0, 0.2, emit=(0.015, 0.03, 0.08), strength=1.0),
         green=glow("e11_green", (0.1, 1.0, 0.35), 5.0),
         red=glow("e11_red", (1.0, 0.08, 0.05), 6.0),
         amber=glow("e11_amber", (1.0, 0.55, 0.05), 6.0),
@@ -209,7 +209,7 @@ def rack(M, i, y):
     box(f"rk_{i}", (0, 0, 1.0), (1.0, 0.62, 2.0), M["rack"], parent=g, bevel=0.015)
     for k in range(14):
         box(f"ru_{i}_{k}", (-0.505, 0, 0.18 + k * 0.125), (0.02, 0.54, 0.1), M["unit"], parent=g, bevel=0.004)
-    led = glow(f"e11_led_{i}", (1.0, 0.55, 0.05), 7.0)
+    led = glow(f"e11_led_{bpy.context.scene.name}_{i}", (1.0, 0.55, 0.05), 7.0)
     for k in range(14):
         box(f"rl_{i}_{k}", (-0.518, 0.22, 0.18 + k * 0.125), (0.006, 0.05, 0.03), led, parent=g, bevel=0)
     box(f"rstrip_{i}", (-0.52, -0.29, 1.0), (0.008, 0.025, 1.8), led, parent=g, bevel=0)
