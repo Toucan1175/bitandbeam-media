@@ -26,7 +26,7 @@ def _mats():
         desk=mat("e11_desk", (0.32, 0.25, 0.18), 0.0, 0.45, wear=0.15, wear_scale=20),
         leg=mat("e11_leg", (0.1, 0.1, 0.11), 0.9, 0.3),
         bezel=mat("e11_bezel", (0.02, 0.02, 0.025), 0.3, 0.35),
-        screen=mat("e11_screen", (0.01, 0.02, 0.05), 0.0, 0.2, emit=(0.06, 0.12, 0.3), strength=2.5),
+        screen=mat("e11_screen", (0.01, 0.015, 0.03), 0.0, 0.2, emit=(0.02, 0.05, 0.13), strength=1.6),
         green=glow("e11_green", (0.1, 1.0, 0.35), 5.0),
         red=glow("e11_red", (1.0, 0.08, 0.05), 6.0),
         amber=glow("e11_amber", (1.0, 0.55, 0.05), 6.0),
@@ -73,8 +73,41 @@ def _world(sc):
             pass
 
 
-# ------------------------------------------------------------------ the world
+# ------------------------------------------------------------------ the world (built once, linked into every shot)
+def _collect(cname, before):
+    col = bpy.data.collections.get(cname) or bpy.data.collections.new(cname)
+    sc = bpy.context.scene
+    for o in list(sc.collection.objects):
+        if o.name not in before:
+            sc.collection.objects.unlink(o); col.objects.link(o)
+    return col
+
+
+def build_world():
+    """Scene 'ep11_world' holds collections E11_WORLD (room, desks, lights) and E11_CROWD (traders)."""
+    if bpy.data.collections.get("E11_WORLD") and bpy.data.collections.get("E11_CROWD"):
+        return
+    sc = stage("ep11_world", seconds=2); _world(sc)
+    M = _mats()
+    before = set(o.name for o in sc.collection.objects)
+    _room(M); trading_floor(M)
+    w = _collect("E11_WORLD", before); sc.collection.children.link(w)
+    before = set(o.name for o in sc.collection.objects)
+    crowd()
+    c = _collect("E11_CROWD", before); sc.collection.children.link(c)
+
+
 def office(M, desks=True, racks=True, people=True):
+    """Link the shared world into the current shot scene; racks are built per shot (their lights animate)."""
+    sc = bpy.context.scene
+    sc.collection.children.link(bpy.data.collections["E11_WORLD"])
+    if people:
+        sc.collection.children.link(bpy.data.collections["E11_CROWD"])
+    if racks:
+        server_room(M)
+
+
+def _room(M):
     floor_m = bpy.data.materials.get("grey_cartago_02")
     bpy.ops.mesh.primitive_plane_add(size=1, location=(-1, 0, 0)); fl = bpy.context.object; fl.name = "floor"
     fl.scale = (38, 24, 1); bpy.ops.object.transform_apply(scale=True)
@@ -110,12 +143,6 @@ def office(M, desks=True, racks=True, people=True):
     s.data.angle = R(2)
     for x in (-14, -6, 2, 12):
         area((x, 0, 3.4), (x, 0, 0), 900, 6, (1.0, 0.95, 0.9), f"fill_{x}")
-    if desks:
-        trading_floor(M)
-    if racks:
-        server_room(M)
-    if people:
-        crowd()
 
 
 def desk(M, x, y, rotz=0, n_mon=2, red=False):
@@ -189,6 +216,9 @@ def person(name, loc, rotz=0.0, action="Working", f0=1, speed=1.0, scale=1.0):
         arm.matrix_world = root0.matrix_world @ arm0.matrix_basis
     arm.location = loc; arm.rotation_euler = (arm.rotation_euler[0], arm.rotation_euler[1], rotz)
     arm.scale = [s * scale for s in arm.scale]
+    if mesh.material_slots:
+        mesh.material_slots[0].link = 'OBJECT'
+        mesh.material_slots[0].material = random.choice(PEOPLE_MATS())
     ad = arm.animation_data or arm.animation_data_create()
     act = bpy.data.actions.get(f"Human Armature|{action}")
     ad.action = None
@@ -203,6 +233,12 @@ def person(name, loc, rotz=0.0, action="Working", f0=1, speed=1.0, scale=1.0):
     n = act.frame_range[1] - act.frame_range[0]
     st.repeat = max(1.0, (sc.frame_end + 40) / max(1.0, n / speed))
     return arm
+
+
+def PEOPLE_MATS():
+    return [mat(f"e11_ppl_{i}", c, 0.0, r) for i, (c, r) in enumerate([
+        ((0.08, 0.12, 0.22), 0.6), ((0.16, 0.16, 0.18), 0.6), ((0.62, 0.64, 0.68), 0.55), ((0.5, 0.42, 0.32), 0.65),
+        ((0.3, 0.12, 0.1), 0.6)])]
 
 
 def crowd():
@@ -428,6 +464,7 @@ PORTRAIT = ["switch", "racks", "flood", "rollback", "emails"]
 
 
 def build(names, v=False):
+    build_world()
     out = []
     for n in names:
         sc = SHOTS[n](v)
