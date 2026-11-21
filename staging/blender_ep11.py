@@ -445,7 +445,7 @@ def shot_pile(v=False):
         o.rotation_euler = (0, 0, random.uniform(0, math.pi))
         f = int(8 + k * (sc.frame_end - 40) / n)
         animate(o, "location", [(f, Vector((x, y, 3.5))), (f + 9, Vector((x, y, z)))], interp='BEZIER', ease='EASE_IN')
-    for k, (x, y) in enumerate([(-11.5, -1.9), (-4.6, -1.9), (-4.8, 6.3), (-11.2, 6.3)]):   # in the aisles, facing the pile
+    for k, (x, y) in enumerate([(-11.5, -1.9), (-3.2, -1.9), (-3.2, 6.3), (-11.2, 6.3)]):   # in the aisles, facing the pile
         person(f"obs_{k}", (x, y, 0), face((cx, cy), (x, y)), "Idle", f0=-k * 30)
     # (no 3D label: the edit's HUD chip carries the number)
     camera("orbit", target=(cx, cy, 1.3), radius=6.0, height=0.7, deg=30, start_deg=-110, lens=22, fstop=5)
