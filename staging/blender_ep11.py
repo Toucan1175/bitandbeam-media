@@ -245,7 +245,8 @@ def person(name, loc, rotz=0.0, action="Working", f0=1, speed=1.0, scale=1.0):
     if root0 is not None:
         arm.parent = None
         arm.matrix_world = root0.matrix_world @ arm0.matrix_basis
-    arm.location = loc; arm.rotation_euler = (arm.rotation_euler[0], arm.rotation_euler[1], rotz)
+    arm.location = loc
+    arm.rotation_mode = 'XYZ'; arm.rotation_euler = (0, 0, rotz)   # glTF armatures import in QUATERNION mode: euler is ignored otherwise
     arm.scale = [s * scale for s in arm.scale]
     if mesh.material_slots:
         mesh.material_slots[0].link = 'OBJECT'
@@ -273,22 +274,22 @@ def PEOPLE_MATS():
 
 
 def crowd():
-    """Traders stand behind their chairs, facing their screens. Quaternius figures face +Y at rotation 0."""
+    """Traders stand behind their chairs, facing their screens. Quaternius figures face -Y at identity."""
     random.seed(7)
     rows = {-8: 0, -4: 1, 0: 0, 4: 1, 8: 0}          # row y -> rotated 180 (screens face +Y) if 1
     picks = [(-15.2, -8), (-9, -8), (-5.4, -4), (-13.4, 0), (-7.2, 0), (0.8, 0), (-1, 4), (-15.2, 4), (-9, 8), (2.6, 8)]
     for k, (x, ry) in enumerate(picks):
         if rows[ry]:
-            loc, rz = (x, ry + 1.3, 0), math.pi
+            loc, rz = (x, ry + 1.3, 0), 0.0       # identity faces -Y (toward these screens)
         else:
-            loc, rz = (x, ry - 1.3, 0), 0.0
-        person(f"trader_{k}", loc, rz, random.choice(["Working", "Working", "Idle"]), f0=-random.randint(0, 120),
+            loc, rz = (x, ry - 1.3, 0), math.pi
+        person(f"trader_{k}", loc, rz, "Idle", f0=-random.randint(0, 150),   # "Working" is a kneeling pose
                scale=random.uniform(0.95, 1.05))
 
 
 def face(target_xy, loc):
-    """Rotation (Z) that turns a Quaternius figure (forward +Y) at loc toward target_xy."""
-    return math.atan2(-(target_xy[0] - loc[0]), target_xy[1] - loc[1])
+    """Rotation (Z) that turns a Quaternius figure (forward -Y at identity) at loc toward target_xy."""
+    return math.atan2(target_xy[0] - loc[0], -(target_xy[1] - loc[1]))
 
 
 # ------------------------------------------------------------------ shots
@@ -358,7 +359,7 @@ def shot_racks(v=False):
         else:
             _keycol(m, [(f - 2, amber), (f + 4, amber)])
     _txt("lbl_old", "OLD CODE", (RACK_X - 0.56, RACK_Y[7], 2.62), 0.2, M["red"], rot=(R(90), 0, R(-90)))
-    tech = person("tech", (10.7, -8.5, 0), 0.0, "Walk", speed=1.0)   # Quaternius figures face +Y: walks away from camera
+    tech = person("tech", (10.7, -8.5, 0), math.pi, "Walk", speed=1.0)   # identity faces -Y; pi = walking toward +Y
     animate(tech, "location", [(1, Vector((10.7, -8.5, 0))), (sc.frame_end - 20, Vector((10.7, 7.2, 0)))], interp='LINEAR')
     if v:
         camera("dolly", target=(RACK_X, 0, 1.0), start=(7.4, -9.5, 1.6), end=(7.6, -6.5, 1.6), lens=24, fstop=4)
@@ -434,17 +435,20 @@ def shot_pile(v=False):
     b0.scale = (0.45, 0.35, 0.3); bpy.ops.object.transform_apply(location=False, rotation=False, scale=True); b0.data.materials.append(M["box"])
     b0.location = (0, 0, -60)
     bv = b0.modifiers.new("bevel", 'BEVEL'); bv.width = 0.015; bv.segments = 2
-    cx, cy = -8.1, 2.0
-    fps = sc.render.fps; n = 260
+    cx, cy = -8.1, 2.0          # the open aisle between desk rows y=0 and y=4 (clear floor from y 0.7 to 3.3)
+    fps = sc.render.fps; n = 240
     for k in range(n):
         layer = int((k / n) ** 0.6 * 9)
-        rad = max(0.4, 2.6 - layer * 0.26)
-        a = random.uniform(0, 2 * math.pi); r = rad * math.sqrt(random.random())
-        x, y, z = cx + r * math.cos(a), cy + r * math.sin(a), 0.15 + layer * 0.29
+        shrink = max(0.25, 1.0 - layer * 0.1)
+        a = random.uniform(0, 2 * math.pi); r = math.sqrt(random.random())
+        x = cx + 3.0 * shrink * r * math.cos(a); y = cy + 1.15 * shrink * r * math.sin(a)
+        z = 0.15 + layer * 0.29
         o = b0.copy(); o.data = b0.data; o.name = f"sbox_{k}"; sc.collection.objects.link(o)
         o.rotation_euler = (0, 0, random.uniform(0, math.pi))
         f = int(8 + k * (sc.frame_end - 40) / n)
-        animate(o, "location", [(f, Vector((x, y, 3.5))), (f + 9, Vector((x, y, z)))], interp='BEZIER', ease='EASE_IN')
+        animate(o, "location", [(f, Vector((x, y, 3.4))), (f + 9, Vector((x, y, z)))], interp='BEZIER', ease='EASE_IN')
+        # invisible until it starts to fall (no boxes parked under the ceiling)
+        animate(o, "scale", [(1, Vector((0.001, 0.001, 0.001))), (f - 1, Vector((0.001, 0.001, 0.001))), (f, Vector((1, 1, 1)))], interp='CONSTANT')
     for k, (x, y) in enumerate([(-11.5, -1.9), (-3.2, -1.9), (-3.2, 6.3), (-11.2, 6.3)]):   # in the aisles, facing the pile
         person(f"obs_{k}", (x, y, 0), face((cx, cy), (x, y)), "Idle", f0=-k * 30)
     # (no 3D label: the edit's HUD chip carries the number)
